@@ -12,7 +12,7 @@ var budgetController = (function(){
 
     if(totalIncome > 0){
       this.percentage = Math.round((this.value / totalIncome)*100);
-    } else{
+    } else {
       this.percentage = -1;
     }
     
@@ -121,7 +121,7 @@ var budgetController = (function(){
 
     calculatePercentages: function(){
       data.allItems.exp.forEach(function(cur){
-        cur.calcPercentage();
+        cur.calcPercentage(data.totals.inc);
       });
     },
 
@@ -129,7 +129,7 @@ var budgetController = (function(){
       var allPerc = data.allItems.exp.map(function(cur){
         return cur.getPercentage();
       });
-      return allPerc
+      return allPerc;
     },
 
     getBudget: function(){
@@ -163,7 +163,8 @@ var UIController = (function(){
     incomeLabel: '.budget__income--value',
     expensesLabel: '.budget__expenses--value',
     percentageLabel: '.budget__expenses--percentage',
-    container: '.container'
+    container: '.container',
+    expensesPercLabel: '.item__percentage'
   };
 
   return {
@@ -232,6 +233,26 @@ var UIController = (function(){
         }
     },
 
+    displayPercentages: function(percentages){
+      var fields = document.querySelectorAll(DOMstrings.expensesPercLabel);
+
+      var nodeListForEach = function(list, callback){
+        for(var i = 0; i < list.length; i++){
+          callback(list[i], i);
+        }
+      };
+
+      nodeListForEach(fields, function(current, index){
+        
+        if(percentages[index] > 0){
+
+          current.textContent = percentages[index] + '%';
+        } else {
+          current.textContent = '---';
+        }
+      });
+    },
+
     getDOMstrings: function(){
       return DOMstrings;
     }
@@ -278,8 +299,11 @@ var controller = (function(budgetCtrl, UICtrl){
     budgetCtrl.calculatePercentages();
 
     //2. Read percentages from the budget controller
+
     var percentages = budgetCtrl.getPercentage();
     //3. update the UI with the new percentages
+
+    UICtrl.displayPercentages(percentages);
   }
   
   var ctrlAddItem = function(){
